@@ -1,47 +1,130 @@
 package com.example.locationapp
 
+import android.content.Context
 import android.os.Bundle
+import android.Manifest
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import com.example.locationapp.ui.theme.LocationAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             LocationAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MyApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MyApp() {
+    val context = LocalContext.current
+    val locationUtils = LocationUtils(context)
+
+    LocationDisplay(locationUtils, context)
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    LocationAppTheme {
-        Greeting("Android")
+fun LocationDisplay(
+    locationUtils: LocationUtils,
+    context : Context,
+) {
+
+    // Create a launcher to request permissions
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        // The contract definition that we want: multiple permissions
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+
+        // A callback when the user responds to the permission dialog
+        onResult = { permissions ->
+            // If user has both permission, good
+            if(permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                && permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true){
+                // Access granted
+            }
+
+            // If either or both permissions are denied,
+            // find out if we should ask for permissions again
+            else {
+                // Cast the passed context to MainActivity
+                val cam = context as MainActivity
+
+                // Should the app show a rationale for the denied permission?
+                // returns TRUE if the app has requested this permission PREVIOUSLY
+                // and the user DENIED the request.
+
+                // returns FALSE if the user turned down the permission request in the past
+                // and chose the `Don't ask again` option in the permission request system dialog
+
+                // returns FALSE if a device policy prohibits the app from having that permission.
+                val rationaleRequired = ActivityCompat.shouldShowRequestPermissionRationale(
+                    cam,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) || ActivityCompat.shouldShowRequestPermissionRationale(
+                    cam,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+
+                if(rationaleRequired) {
+                    Toast.makeText(
+                        context,
+                        "Rationale IS required.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+                else {
+                    Toast.makeText(
+                        context,
+                        "Please enable location permission in the settings to continue.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "Your location is unknown.",
+            style = TextStyle(fontSize = 24.sp)
+        )
+        Button(onClick = {
+            if(locationUtils.hasLocationPermission(context)) {
+                // Get location
+            }
+            else {
+                // request location permission
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                    )
+                )
+            }
+        }) {
+            Text(text = "Get location")
+        }
     }
 }
