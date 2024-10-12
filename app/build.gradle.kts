@@ -50,6 +50,11 @@ android {
 }
 
 dependencies {
+    // Compose ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+
+    // Location API from Google
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

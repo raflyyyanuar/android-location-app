@@ -3,6 +3,7 @@ package com.example.locationapp
 import android.content.Context
 import android.os.Bundle
 import android.Manifest
+import android.app.GameManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,33 +21,34 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.locationapp.ui.theme.LocationAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel : LocationViewModel = viewModel()
             LocationAppTheme {
-                MyApp()
+                MyApp(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun MyApp() {
+fun MyApp(viewModel: LocationViewModel) {
     val context = LocalContext.current
     val locationUtils = LocationUtils(context)
-
-    LocationDisplay(locationUtils, context)
+    LocationDisplay(context, locationUtils, viewModel)
 }
 
 @Composable
 fun LocationDisplay(
-    locationUtils: LocationUtils,
     context : Context,
+    locationUtils: LocationUtils,
+    viewModel: LocationViewModel
 ) {
-
     // Create a launcher to request permissions
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         // The contract definition that we want: multiple permissions
