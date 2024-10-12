@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,6 +51,10 @@ fun LocationDisplay(
     viewModel: LocationViewModel
 ) {
     val location = viewModel.location.value
+
+    val address = location?.let {
+        locationUtils.reverseGeocodeLocation(location)
+    }
 
     // Create a launcher to request permissions
     val requestPermissionLauncher = rememberLauncherForActivityResult(
@@ -114,14 +119,15 @@ fun LocationDisplay(
     ) {
         if(location != null) {
             Text(
-                "Address: ${location.latitude}/${location.longitude}",
-                style = TextStyle(fontSize = 20.sp),
+                "Coordinate: ${location.latitude}/${location.longitude}",
+            )
+            Text(
+                "Address: $address",
             )
         }
         else {
             Text(
                 "Address: Unknown",
-                style = TextStyle(fontSize = 20.sp),
             )
         }
         Button(onClick = {
