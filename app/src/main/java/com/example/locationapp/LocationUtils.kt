@@ -22,7 +22,10 @@ class LocationUtils(val context : Context) {
     private val _fusedLocationClient : FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
+    @SuppressLint("Missing")
     fun requestLocationUpdates(viewModel: LocationViewModel) {
+        // Implement an abstract class to update location
+        // to the current latitude and longitude
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
@@ -33,10 +36,14 @@ class LocationUtils(val context : Context) {
             }
         }
 
+        // A location request object to get high accuracy location
+        // that gets updated every 1000 ms
         val locationRequest = LocationRequest
             .Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .build()
 
+        // Actually request location updates
+        // on the Fused Location Provider Client object
         _fusedLocationClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
@@ -58,9 +65,12 @@ class LocationUtils(val context : Context) {
             ) == PackageManager.PERMISSION_GRANTED
     }
 
+    // Reverse latitude and longitude to a human-readable address
     fun reverseGeocodeLocation(location: LocationData) : String {
         val geocoder = Geocoder(context, Locale.getDefault())
         val coordinate = LatLng(location.latitude, location.longitude)
+
+        // Get max result of 1 address from the current coordinate
         val addresses : MutableList<Address>? = geocoder.getFromLocation(
             coordinate.latitude,
             coordinate.longitude,
