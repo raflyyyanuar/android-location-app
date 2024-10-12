@@ -16,6 +16,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
 
 class LocationUtils(val context : Context) {
     private val _fusedLocationClient : FusedLocationProviderClient =
@@ -58,7 +59,7 @@ class LocationUtils(val context : Context) {
     }
 
     fun reverseGeocodeLocation(location: LocationData) : String {
-        val geocoder = Geocoder(context)
+        val geocoder = Geocoder(context, Locale.getDefault())
         val coordinate = LatLng(location.latitude, location.longitude)
         val addresses : MutableList<Address>? = geocoder.getFromLocation(
             coordinate.latitude,
