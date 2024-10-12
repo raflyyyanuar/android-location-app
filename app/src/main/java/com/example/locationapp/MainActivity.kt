@@ -49,6 +49,8 @@ fun LocationDisplay(
     locationUtils: LocationUtils,
     viewModel: LocationViewModel
 ) {
+    val location = viewModel.location.value
+
     // Create a launcher to request permissions
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         // The contract definition that we want: multiple permissions
@@ -60,6 +62,8 @@ fun LocationDisplay(
             if(permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
                 && permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true){
                 // Access granted
+
+                locationUtils.requestLocationUpdates(viewModel)
             }
 
             // If either or both permissions are denied,
@@ -108,13 +112,22 @@ fun LocationDisplay(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            "Your location is unknown.",
-            style = TextStyle(fontSize = 24.sp)
-        )
+        if(location != null) {
+            Text(
+                "Address: ${location.latitude}/${location.longitude}",
+                style = TextStyle(fontSize = 20.sp),
+            )
+        }
+        else {
+            Text(
+                "Address: Unknown",
+                style = TextStyle(fontSize = 20.sp),
+            )
+        }
         Button(onClick = {
             if(locationUtils.hasLocationPermission(context)) {
                 // Get location
+                locationUtils.requestLocationUpdates(viewModel)
             }
             else {
                 // request location permission
